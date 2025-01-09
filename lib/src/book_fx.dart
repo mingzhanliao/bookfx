@@ -65,15 +65,26 @@ class _BookFxState extends State<BookFx> with SingleTickerProviderStateMixin {
 
   AnimationController? _controller;
 
-  // 当前页面
+  // 控制点类
+  late final ValueNotifier<PaperPoint> _p;
 
   @override
   void initState() {
     super.initState();
+    
+    // 修改初始化位置，确保是有效值
+    _p = ValueNotifier(
+      PaperPoint(
+        Point(widget.size.width, widget.size.height), 
+        widget.size
+      )
+    );
 
     _controller = AnimationController(
-        vsync: this,
-        duration: widget.duration ?? const Duration(milliseconds: 800));
+      vsync: this,
+      duration: widget.duration ?? const Duration(milliseconds: 800)
+    );
+
     _controller?.addListener(() {
       if (isNext) {
         /// 翻页
@@ -162,9 +173,6 @@ class _BookFxState extends State<BookFx> with SingleTickerProviderStateMixin {
   bool isNext = true; // 是否翻页到下一页
   bool isAlPath = true; //
   bool isAnimation = false; // 是否正在执行翻页
-  // 控制点类
-  final ValueNotifier<PaperPoint> _p =
-      ValueNotifier(PaperPoint(const Point(0, 0), const Size(0, 0)));
 
   @override
   Widget build(BuildContext context) {

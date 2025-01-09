@@ -13,6 +13,10 @@ class BookPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (!_isValidPoint(p.value.a) || !_isValidPoint(p.value.f)) {
+      return;
+    }
+
     canvas.clipRect(Offset.zero & size);
 
     canvas.save();
@@ -31,25 +35,34 @@ class BookPainter extends CustomPainter {
     /// af重合时不需要绘制
     if (p.value.a == p.value.f || p.value.a.y == p.value.f.y) return;
 
+    if (!_arePointsValid()) {
+      return;
+    }
+
     /// AB合并的区域
     Path mPathAB = Path();
-    mPathAB.moveTo(p.value.c.x, p.value.c.y);
-    mPathAB.quadraticBezierTo(
-      p.value.e.x,
-      p.value.e.y,
-      p.value.b.x,
-      p.value.b.y,
-    );
-    mPathAB.lineTo(p.value.a.x, p.value.a.y);
-    mPathAB.lineTo(p.value.k.x, p.value.k.y);
-    mPathAB.quadraticBezierTo(
-      p.value.h.x,
-      p.value.h.y,
-      p.value.j.x,
-      p.value.j.y,
-    );
-    mPathAB.lineTo(p.value.f.x, p.value.f.y);
-    mPathAB.close();
+    try {
+      mPathAB.moveTo(p.value.c.x, p.value.c.y);
+      mPathAB.quadraticBezierTo(
+        p.value.e.x,
+        p.value.e.y,
+        p.value.b.x,
+        p.value.b.y,
+      );
+      mPathAB.lineTo(p.value.a.x, p.value.a.y);
+      mPathAB.lineTo(p.value.k.x, p.value.k.y);
+      mPathAB.quadraticBezierTo(
+        p.value.h.x,
+        p.value.h.y,
+        p.value.j.x,
+        p.value.j.y,
+      );
+      mPathAB.lineTo(p.value.f.x, p.value.f.y);
+      mPathAB.close();
+    } catch (e) {
+      debugPrint('Error creating path: $e');
+      return;
+    }
 
     /// B区域 当前页不可见区域
     /// B区域的三角形，用于分离AB区域
@@ -216,6 +229,33 @@ class BookPainter extends CustomPainter {
           [Colors.black26, Colors.transparent],
         ),
     );
+  }
+
+  bool _isValidPoint(Point<double> point) {
+    return !point.x.isNaN && 
+           !point.y.isNaN && 
+           !point.x.isInfinite && 
+           !point.y.isInfinite;
+  }
+
+  bool _arePointsValid() {
+    return _isValidPoint(p.value.a) &&
+           _isValidPoint(p.value.b) &&
+           _isValidPoint(p.value.c) &&
+           _isValidPoint(p.value.d) &&
+           _isValidPoint(p.value.e) &&
+           _isValidPoint(p.value.f) &&
+           _isValidPoint(p.value.g) &&
+           _isValidPoint(p.value.h) &&
+           _isValidPoint(p.value.i) &&
+           _isValidPoint(p.value.j) &&
+           _isValidPoint(p.value.k);
+  }
+
+  Path? _safeCombinePaths(Path path1, Path path2, PathOperation operation) {
+    
+      return Path.combine(operation, path1, path2);
+
   }
 
   @override

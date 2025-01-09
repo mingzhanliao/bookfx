@@ -2,21 +2,35 @@ import 'package:flutter/material.dart';
 
 class TextUtil {
   /// 获取文字高度
-  static double calculateTextHeight(String value, double fontSize,
-      {required double fontHeight, required double maxWidth, required EdgeInsetsGeometry padding}) {
+  static double calculateTextHeight(
+    String value,
+    double fontSize, {
+    required double fontHeight,
+    required double maxWidth,
+    required EdgeInsetsGeometry padding,
+    BuildContext? context,
+  }) {
     TextPainter painter = TextPainter(
-        locale: WidgetsBinding.instance.window.locale,
-        textDirection: TextDirection.ltr,
-        maxLines: 1000,
-        strutStyle: StrutStyle(forceStrutHeight: true, fontSize: fontSize, height: fontHeight),
-        text: TextSpan(
-          text: value,
-          style: TextStyle(
-            height: fontHeight,
-            fontSize: fontSize,
-          ),
+      // 如果没有提供context,使用默认locale
+      locale: context != null 
+          ? View.of(context).platformDispatcher.locale
+          : const Locale('en', 'US'),
+      textDirection: TextDirection.ltr,
+      maxLines: 1000,
+      strutStyle: StrutStyle(
+        forceStrutHeight: true,
+        fontSize: fontSize,
+        height: fontHeight,
+      ),
+      text: TextSpan(
+        text: value,
+        style: TextStyle(
+          height: fontHeight,
+          fontSize: fontSize,
         ),
-        textAlign: TextAlign.center);
+      ),
+      textAlign: TextAlign.center,
+    );
     painter.layout(maxWidth: maxWidth - padding.horizontal);
     return painter.size.height;
   }
@@ -29,9 +43,12 @@ class TextUtil {
     required double maxWidth,
     required EdgeInsetsGeometry padding,
     int maxLines = 3,
+    BuildContext? context,
   }) {
     final TextPainter painter = TextPainter(
-      locale: WidgetsBinding.instance.window.locale,
+      locale: context != null 
+          ? View.of(context).platformDispatcher.locale
+          : const Locale('en', 'US'),
       textDirection: TextDirection.ltr,
       maxLines: maxLines,
       strutStyle: StrutStyle(
@@ -50,13 +67,11 @@ class TextUtil {
     );
     painter.layout(maxWidth: maxWidth - padding.horizontal);
     final didExceedMaxLines = painter.didExceedMaxLines;
-    // print('是否超出最大行$didExceedMaxLines');
     if (didExceedMaxLines) {
       final position = painter.getPositionForOffset(Offset(
         painter.width,
         painter.height,
       ));
-      /// 如果下一页开始处于段落开始，+2避免首行换行空行展示
       if (value.substring(position.offset).startsWith('\n')) {
         return position.offset + 2;
       }
